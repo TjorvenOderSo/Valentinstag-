@@ -35,20 +35,22 @@ function resetGame() {
   player.y = canvas.height - 100;
   player.vy = -12;
 
-  // Plattformen
+  // Mehr Plattformen proportional zur Höhe
+  const platformCount = Math.floor(canvas.height / 60); // alle 60px eine Plattform
   platforms = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < platformCount; i++) {
     platforms.push({
       x: Math.random() * (canvas.width - 120),
-      y: i * (canvas.height / 8),
+      y: i * (canvas.height / platformCount),
       w: 120,
       h: 15
     });
   }
 
-  // Herzen
+  // Mehr Herzen proportional zur Fläche
+  const heartCount = Math.floor((canvas.width * canvas.height) / 50000); // ~1 Herz pro 50k px²
   hearts = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < heartCount; i++) {
     hearts.push({
       x: Math.random() * (canvas.width - 30),
       y: Math.random() * canvas.height,
@@ -125,7 +127,7 @@ function update() {
       });
     }
 
-    // Herz-Sammeln
+    // Herz-Sammeln (größere Hitbox)
     hearts.forEach(h => {
       if (!h.collected && Math.hypot(player.x - h.x, player.y - h.y) < 35) {
         h.collected = true;
@@ -186,7 +188,7 @@ function draw() {
     ctx.fillRect(canvas.width / 2 - 80, canvas.height / 2 + 20, 160, 45);
     ctx.fillStyle = "#fff";
     ctx.font = "18px Arial";
-    ctx.fillText("Nochmal 😈", canvas.width / 2, canvas.height / 2 + 52);
+    ctx.fillText("Nochmal 😙", canvas.width / 2, canvas.height / 2 + 52);
   }
 }
 
