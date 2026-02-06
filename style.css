@@ -1,16 +1,16 @@
 body {
   margin: 0;
   background: #ffdee9;
+  font-family: sans-serif;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  font-family: sans-serif;
 }
 
 button {
-  padding: 12px 24px;
+  padding: 12px 26px;
   font-size: 18px;
   border: none;
   border-radius: 12px;
@@ -19,24 +19,14 @@ button {
   cursor: pointer;
 }
 
-.title {
-  margin-bottom: 20px;
-}
-
 .heart {
   position: absolute;
   bottom: 0;
-  font-size: 24px;
+  font-size: 26px;
   animation: float 2s linear forwards;
 }
 
 @keyframes float {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-150px);
-    opacity: 0;
-  }
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-200px); opacity: 0; }
 }
