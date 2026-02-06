@@ -297,5 +297,10 @@ function draw() {
 }
 
 // === START ===
-resetGame();
-update();
+// ... ALLE DEINEN VARIABLEN, RESETGAME-FUNKTION, UPDATE UND DRAW ... //
+// Genau wie wir sie vorher hatten, nur unten ändern:
+
+function startGame() {
+  resetGame();
+  update();
+}
