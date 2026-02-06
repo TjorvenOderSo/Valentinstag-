@@ -4,31 +4,31 @@ const ctx = canvas.getContext("2d");
 const jumpSound = document.getElementById("jumpSound");
 const heartSound = document.getElementById("heartSound");
 
-// GAME VARIABLES
-let score = 0;
-let gameOver = false;
+// CONSTANTS
 const PLATFORM_WIDTH = 120;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_RADIUS = 20;
+const GRAVITY = 0.25;   // feste Gravitation
+const JUMP = -8;        // feste Sprungkraft
+
+// GAME VARIABLES
+let score = 0;
+let gameOver = false;
 
 // Ball
 const player = {
   x: canvas.width / 2,
   y: canvas.height - 60,
-  vy: -8,     // langsamerer Startsprung
+  vy: -8,
   scale: 1
 };
-
-// Physics
-const gravity = 0.25; // sanftere Gravitation
-const jump = -8;      // sanfterer Sprung
 
 // Arrays
 let platforms = [];
 let hearts = [];
 
-// THEMES
-let currentTheme = "ground"; // ground → sky → space → moon
+// Theme
+let currentTheme = "ground";
 
 // RESET GAME
 function resetGame() {
@@ -47,19 +47,26 @@ function resetGame() {
   // Bodenplattform
   platforms.push({x: canvas.width/2 - 150, y: canvas.height - 20, w: 300, h: PLATFORM_HEIGHT});
 
-  // Plattformen generieren
+  // Start-Plattformen
   let lastY = canvas.height - 60;
-  while(lastY > -canvas.height*3){ // 3x Bildschirm Höhe
-    const spacing = 90 + Math.random()*50; // Abstand vergrößert
-    lastY -= spacing;
-    const x = Math.random()*(canvas.width - PLATFORM_WIDTH);
-    platforms.push({x:x, y:lastY, w:PLATFORM_WIDTH, h:PLATFORM_HEIGHT});
-
-    // Herz auf Plattform
-    if(Math.random()<0.7){
-      hearts.push({x:x + PLATFORM_WIDTH/2, y:lastY - 25, collected:false});
-    }
+  while(lastY > -canvas.height*2){ // 2x Bildschirmhöhe initial
+    lastY = addPlatform(lastY);
   }
+}
+
+// Add a new platform
+function addPlatform(lastY){
+  const spacing = 90 + Math.random()*50;
+  lastY -= spacing;
+  const x = Math.random()*(canvas.width - PLATFORM_WIDTH);
+  platforms.push({x:x, y:lastY, w:PLATFORM_WIDTH, h:PLATFORM_HEIGHT});
+
+  // Herz auf Plattform
+  if(Math.random()<0.7){
+    hearts.push({x:x + PLATFORM_WIDTH/2, y:lastY - 25, collected:false});
+  }
+
+  return lastY;
 }
 
 // Mouse control
@@ -78,7 +85,7 @@ canvas.addEventListener("click", e => {
   }
 });
 
-// START GAME FUNCTION
+// START GAME
 function startGame(){
   resetGame();
   update();
@@ -90,7 +97,7 @@ function update(){
 
   if(!gameOver){
     // Gravity
-    player.vy += gravity;
+    player.vy += GRAVITY;
     player.y += player.vy;
 
     // Ball wippen
@@ -99,7 +106,7 @@ function update(){
     // Collision with platforms
     platforms.forEach(p=>{
       if(player.vy>0 && player.x>p.x && player.x<p.x+p.w && player.y+PLAYER_RADIUS>p.y && player.y+PLAYER_RADIUS<p.y+p.h){
-        player.vy = jump;
+        player.vy = JUMP;
         jumpSound.currentTime=0;
         jumpSound.play();
       }
@@ -124,7 +131,13 @@ function update(){
     if(player.y < canvas.height/2){
       const diff = canvas.height/2 - player.y;
       player.y = canvas.height/2;
-      platforms.forEach(p=>p.y+=diff);
+      platforms.forEach(p=>{
+        p.y += diff;
+        // neue Plattform oben hinzufügen, wenn letzte zu weit unten
+        if(p.y > -PLATFORM_HEIGHT && Math.random()<0.3){
+          addPlatform(-canvas.height*3);
+        }
+      });
       hearts.forEach(h=>h.y+=diff);
     }
 
