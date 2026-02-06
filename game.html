@@ -1,116 +1,125 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>❤️ Valentinstag Spiel ❤️</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: sans-serif;
-      background: #ffdee9;
-      height: 100%;
-    }
+<meta charset="UTF-8">
+<title>❤️ Valentinstag Spiel ❤️</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background: #ffdee9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
 
-    #startScreen {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: #ffdee9;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-    }
+  #gameContainer {
+    width: 900px;
+    height: 675px;
+    background: #ffdee9;
+    position: relative;
+    overflow: hidden;
+    border: 4px solid #ff4d6d;
+    border-radius: 12px;
+  }
 
-    #startScreen h1 {
-      font-size: 48px;
-      color: #ff4d6d;
-      margin-bottom: 20px;
-      text-align: center;
-    }
+  canvas {
+    display: block;
+    background: transparent;
+  }
 
-    #startScreen p {
-      font-size: 22px;
-      margin-bottom: 40px;
-      text-align: center;
-      max-width: 600px;
-    }
+  #startScreen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #ffdee9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+  }
 
-    #startButton {
-      font-size: 24px;
-      padding: 15px 40px;
-      background-color: #ff4d6d;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
+  #startScreen h1 {
+    font-size: 36px;
+    color: #ff4d6d;
+    margin-bottom: 20px;
+    text-align: center;
+  }
 
-    #startButton:hover {
-      transform: scale(1.1);
-    }
+  #startScreen p {
+    font-size: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+    max-width: 80%;
+  }
 
-    canvas {
-      display: block;
-    }
-  </style>
+  #startButton {
+    font-size: 22px;
+    padding: 12px 30px;
+    background-color: #ff4d6d;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  #startButton:hover { transform: scale(1.1); }
+</style>
 </head>
 <body>
 
-  <!-- START SCREEN -->
+<div id="gameContainer">
+  <!-- Startscreen -->
   <div id="startScreen">
-    <h1>Willkommen zum Valentinstag-Spiel! ❤️</h1>
+    <h1>Valentinstag-Spiel ❤️</h1>
     <p>
-      Springe mit dem Ball von Plattform zu Plattform, sammle Herzen ein und erreiche den Mond!  
+      Springe mit dem Ball von Plattform zu Plattform und sammle Herzen ein.  
       Bewege den Ball mit der Maus. Sammle 40 Herzen, um zu gewinnen.  
-      Aber pass auf – fällst du runter, geht’s zurück zum Start!
+      Fällst du runter, geht’s zurück zum Start.
     </p>
     <button id="startButton">Start</button>
   </div>
 
-  <!-- GAME CANVAS -->
-  <canvas id="game"></canvas>
+  <!-- Canvas für das Spiel -->
+  <canvas id="game" width="900" height="675"></canvas>
 
-  <!-- SOUNDS -->
+  <!-- Sounds -->
   <audio id="jumpSound" src="jump.mp3"></audio>
   <audio id="heartSound" src="heart.mp3"></audio>
+</div>
 
-  <!-- GAME SCRIPT -->
-  <script src="game.js"></script>
+<script src="game.js"></script>
+<script>
+const startScreen = document.getElementById('startScreen');
+const startButton = document.getElementById('startButton');
 
-  <script>
-    const startScreen = document.getElementById('startScreen');
-    const startButton = document.getElementById('startButton');
-
-    startButton.addEventListener('click', () => {
-      // kleine Herz-Animation
-      let count = 0;
-      const interval = setInterval(() => {
-        const heart = document.createElement("div");
-        heart.className = "heart";
-        heart.innerText = "💗";
-        heart.style.position = "absolute";
-        heart.style.left = Math.random() * window.innerWidth + "px";
-        heart.style.top = Math.random() * window.innerHeight + "px";
-        heart.style.fontSize = "24px";
-        document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 2000);
-        count++;
-        if (count > 40) {
-          clearInterval(interval);
-          // Startbild ausblenden & Spiel starten
-          startScreen.style.display = "none";
-          // Startet das Spiel aus game.js
-          if (typeof startGame === "function") startGame();
-        }
-      }, 50);
-    });
-  </script>
+startButton.addEventListener('click', () => {
+  // kleine Herz-Animation
+  let count = 0;
+  const interval = setInterval(() => {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.innerText = "💗";
+    heart.style.position = "absolute";
+    heart.style.left = Math.random() * 900 + "px";
+    heart.style.top = Math.random() * 675 + "px";
+    heart.style.fontSize = "24px";
+    document.getElementById('gameContainer').appendChild(heart);
+    setTimeout(() => heart.remove(), 1500);
+    count++;
+    if (count > 30) {
+      clearInterval(interval);
+      // Startbild ausblenden & Spiel starten
+      startScreen.style.display = "none";
+      if (typeof startGame === "function") startGame();
+    }
+  }, 50);
+});
+</script>
 
 </body>
 </html>
