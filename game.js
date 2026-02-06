@@ -13,15 +13,15 @@ const PLAYER_RADIUS = 20;
 
 // Ball
 const player = {
-  x: canvas.width/2,
+  x: canvas.width / 2,
   y: canvas.height - 60,
-  vy: -12,
+  vy: -8,     // langsamerer Startsprung
   scale: 1
 };
 
 // Physics
-const gravity = 0.35;
-const jump = -12;
+const gravity = 0.25; // sanftere Gravitation
+const jump = -8;      // sanfterer Sprung
 
 // Arrays
 let platforms = [];
@@ -38,7 +38,7 @@ function resetGame() {
 
   player.x = canvas.width / 2;
   player.y = canvas.height - 60;
-  player.vy = -12;
+  player.vy = -8;
   player.scale = 1;
 
   platforms = [];
@@ -50,7 +50,7 @@ function resetGame() {
   // Plattformen generieren
   let lastY = canvas.height - 60;
   while(lastY > -canvas.height*3){ // 3x Bildschirm Höhe
-    const spacing = 80 + Math.random()*60;
+    const spacing = 90 + Math.random()*50; // Abstand vergrößert
     lastY -= spacing;
     const x = Math.random()*(canvas.width - PLATFORM_WIDTH);
     platforms.push({x:x, y:lastY, w:PLATFORM_WIDTH, h:PLATFORM_HEIGHT});
