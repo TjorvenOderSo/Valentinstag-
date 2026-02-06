@@ -15,10 +15,8 @@ const player = {
 const gravity = 0.35;
 const jumpForce = -10;
 
-// Plattformen
+// Plattformen & Herzen
 let platforms = [];
-
-// Herzen
 let hearts = [];
 
 function resetGame() {
@@ -40,7 +38,7 @@ function resetGame() {
   }
 
   hearts = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 8; i++) {
     hearts.push({
       x: Math.random() * 360,
       y: Math.random() * 600,
@@ -56,11 +54,6 @@ canvas.addEventListener("mousemove", e => {
   player.x = e.clientX - rect.left;
 });
 
-// Neustart bei Klick
-canvas.addEventListener("click", () => {
-  if (gameOver) resetGame();
-});
-
 // Game Loop
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -70,7 +63,7 @@ function update() {
     player.vy += gravity;
     player.y += player.vy;
 
-    // Plattform-Kollision (nur von oben)
+    // Plattform-Kollision
     platforms.forEach(p => {
       if (
         player.vy > 0 &&
@@ -117,7 +110,12 @@ function update() {
       }
     });
 
-    // GAME OVER
+    // 🎉 GEWINN
+    if (score >= 40) {
+      window.location.href = "win.html";
+    }
+
+    // Game Over (runterfallen)
     if (player.y > canvas.height) {
       gameOver = true;
     }
@@ -158,7 +156,7 @@ function drawHearts() {
 function drawScore() {
   ctx.fillStyle = "#000";
   ctx.font = "18px Arial";
-  ctx.fillText("❤️ " + score, 10, 25);
+  ctx.fillText("❤️ " + score + " / 40", 10, 25);
 }
 
 function drawGameOver() {
@@ -168,8 +166,8 @@ function drawGameOver() {
   ctx.fillStyle = "#fff";
   ctx.font = "24px Arial";
   ctx.textAlign = "center";
-  ctx.fillText("Oh nein 😭", canvas.width / 2, 250);
-  ctx.fillText("Klick zum Neustart", canvas.width / 2, 290);
+  ctx.fillText("PAHAHA DU OPFER 🫵😂", canvas.width / 2, 250);
+  ctx.fillText("Neu starten = Seite neu laden", canvas.width / 2, 290);
 }
 
 // Start
