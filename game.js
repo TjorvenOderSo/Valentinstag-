@@ -9,7 +9,7 @@ const PLATFORM_WIDTH = 120;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_RADIUS = 20;
 const GRAVITY = 0.25;   // feste Gravitation
-const JUMP = -8;        // feste Sprungkraft
+const JUMP = -6;        // feste Sprungkraft
 
 // GAME VARIABLES
 let score = 0;
