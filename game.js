@@ -28,6 +28,10 @@ let hearts = [];
 let clouds = [];
 let satellites = [];
 
+// === LEVEL-INFO ===
+const PLATFORM_VERTICAL_SPACING = 80; // vertikaler Abstand
+const PLATFORM_WIDTH = 120;
+
 // === RESET GAME ===
 function resetGame() {
   score = 0;
@@ -47,28 +51,30 @@ function resetGame() {
     x: canvas.width / 2 - 150,
     y: canvas.height - 20,
     w: 300,
-    h: 15
+    h: 15,
+    baseX: canvas.width / 2 - 150
   });
 
-  // === RESTLICHE PLATTFORMEN (sortiert & gestaffelt) ===
-  const platformCount = Math.floor(canvas.height / 80);
+  // === RESTLICHE PLATTFORMEN sortiert & gestaffelt ===
   let lastX = canvas.width / 2 - 60;
-  for (let i = 1; i < platformCount; i++) { // Startplattform ist i=0
-    let y = canvas.height - i * (canvas.height / platformCount) - 60;
-    let xOffset = Math.random() * 100 - 50;
-    let newX = Math.min(Math.max(lastX + xOffset, 0), canvas.width - 120);
+  let platformCount = Math.floor(canvas.height / PLATFORM_VERTICAL_SPACING);
+  for (let i = 1; i < platformCount; i++) {
+    let y = canvas.height - i * PLATFORM_VERTICAL_SPACING - 60;
+    let xOffset = Math.random() * 60 - 30; // +/-30px zufällig
+    let newX = Math.min(Math.max(lastX + xOffset, 0), canvas.width - PLATFORM_WIDTH);
 
     platforms.push({
       x: newX,
       y: y,
-      w: 120,
-      h: 15
+      w: PLATFORM_WIDTH,
+      h: 15,
+      baseX: newX
     });
 
     lastX = newX;
   }
 
-  // === HERZEN AUF PLATTFORMEN ===
+  // === HERZEN auf Plattformen ===
   platforms.forEach(p => {
     if (Math.random() < 0.7) { // 70% Chance Herz
       hearts.push({
@@ -143,7 +149,7 @@ function update() {
     player.vy += gravity;
     player.y += player.vy;
 
-    // Plattform-Kollision (von oben)
+    // Plattform-Kollision
     platforms.forEach(p => {
       if (
         player.vy > 0 &&
@@ -165,7 +171,8 @@ function update() {
         p.y += diff;
         if (p.y > canvas.height) {
           p.y = 0;
-          p.x = Math.random() * (canvas.width - 120);
+          // horizontale Position leicht variieren, Basis beibehalten
+          p.x = Math.min(Math.max(p.baseX + Math.random() * 60 - 30, 0), canvas.width - PLATFORM_WIDTH);
         }
       });
 
@@ -179,7 +186,7 @@ function update() {
       });
 
       clouds.forEach(c => {
-        c.y += diff * 0.2; // Parallax
+        c.y += diff * 0.2;
       });
 
       satellites.forEach(s => {
@@ -187,7 +194,7 @@ function update() {
       });
     }
 
-    // Herz-Sammeln (größere Hitbox)
+    // Herz-Sammeln
     hearts.forEach(h => {
       if (!h.collected && Math.hypot(player.x - h.x, player.y - h.y) < 35) {
         h.collected = true;
@@ -212,7 +219,7 @@ function update() {
 
 // === ZEICHNEN ===
 function draw() {
-  // Himmel/Weltall/Mond-Hintergrund
+  // Hintergrund
   ctx.fillStyle = "#ffdee9";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -272,7 +279,7 @@ function draw() {
     ctx.fillRect(canvas.width / 2 - 80, canvas.height / 2 + 20, 160, 45);
     ctx.fillStyle = "#fff";
     ctx.font = "18px Arial";
-    ctx.fillText("Nochmal 😈", canvas.width / 2, canvas.height / 2 + 52);
+    ctx.fillText("Nochmal 🫩", canvas.width / 2, canvas.height / 2 + 52);
   }
 }
 
