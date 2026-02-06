@@ -2,6 +2,7 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 let score = 0;
+let gameOver = false;
 
 // Player
 const player = {
@@ -16,24 +17,37 @@ const jumpForce = -10;
 
 // Plattformen
 let platforms = [];
-for (let i = 0; i < 8; i++) {
-  platforms.push({
-    x: Math.random() * 300,
-    y: i * 80,
-    w: 100,
-    h: 10
-  });
-}
 
 // Herzen
 let hearts = [];
-for (let i = 0; i < 6; i++) {
-  hearts.push({
-    x: Math.random() * 360,
-    y: Math.random() * 600,
-    r: 10,
-    collected: false
-  });
+
+function resetGame() {
+  score = 0;
+  gameOver = false;
+
+  player.x = 200;
+  player.y = 450;
+  player.vy = -8;
+
+  platforms = [];
+  for (let i = 0; i < 8; i++) {
+    platforms.push({
+      x: Math.random() * 300,
+      y: i * 80,
+      w: 100,
+      h: 10
+    });
+  }
+
+  hearts = [];
+  for (let i = 0; i < 6; i++) {
+    hearts.push({
+      x: Math.random() * 360,
+      y: Math.random() * 600,
+      r: 10,
+      collected: false
+    });
+  }
 }
 
 // Maussteuerung
@@ -42,65 +56,79 @@ canvas.addEventListener("mousemove", e => {
   player.x = e.clientX - rect.left;
 });
 
+// Neustart bei Klick
+canvas.addEventListener("click", () => {
+  if (gameOver) resetGame();
+});
+
 // Game Loop
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Physik
-  player.vy += gravity;
-  player.y += player.vy;
+  if (!gameOver) {
+    // Physik
+    player.vy += gravity;
+    player.y += player.vy;
 
-  // Plattform-Kollision (NUR VON OBEN)
-  platforms.forEach(p => {
-    if (
-      player.vy > 0 &&
-      player.x > p.x &&
-      player.x < p.x + p.w &&
-      player.y + player.r > p.y &&
-      player.y + player.r < p.y + p.h
-    ) {
-      player.vy = jumpForce;
-    }
-  });
-
-  // Kamera-Effekt (Sky Jump Gefühl)
-  if (player.y < 250) {
-    let diff = 250 - player.y;
-    player.y = 250;
-
+    // Plattform-Kollision (nur von oben)
     platforms.forEach(p => {
-      p.y += diff;
-      if (p.y > 600) {
-        p.y = 0;
-        p.x = Math.random() * 300;
+      if (
+        player.vy > 0 &&
+        player.x > p.x &&
+        player.x < p.x + p.w &&
+        player.y + player.r > p.y &&
+        player.y + player.r < p.y + p.h
+      ) {
+        player.vy = jumpForce;
       }
     });
 
-    hearts.forEach(h => {
-      h.y += diff;
-      if (h.y > 600) {
-        h.y = Math.random() * -200;
-        h.x = Math.random() * 360;
-        h.collected = false;
-      }
-    });
-  }
+    // Kamera-Effekt
+    if (player.y < 250) {
+      let diff = 250 - player.y;
+      player.y = 250;
 
-  // Herz-Kollision
-  hearts.forEach(h => {
-    if (
-      !h.collected &&
-      Math.hypot(player.x - h.x, player.y - h.y) < player.r + h.r
-    ) {
-      h.collected = true;
-      score++;
+      platforms.forEach(p => {
+        p.y += diff;
+        if (p.y > 600) {
+          p.y = 0;
+          p.x = Math.random() * 300;
+        }
+      });
+
+      hearts.forEach(h => {
+        h.y += diff;
+        if (h.y > 600) {
+          h.y = Math.random() * -200;
+          h.x = Math.random() * 360;
+          h.collected = false;
+        }
+      });
     }
-  });
+
+    // Herz-Kollision
+    hearts.forEach(h => {
+      if (
+        !h.collected &&
+        Math.hypot(player.x - h.x, player.y - h.y) < player.r + h.r
+      ) {
+        h.collected = true;
+        score++;
+      }
+    });
+
+    // GAME OVER
+    if (player.y > canvas.height) {
+      gameOver = true;
+    }
+  }
 
   drawPlatforms();
   drawHearts();
   drawPlayer();
   drawScore();
+
+  if (gameOver) drawGameOver();
 
   requestAnimationFrame(update);
 }
@@ -123,9 +151,7 @@ function drawPlatforms() {
 function drawHearts() {
   ctx.font = "20px Arial";
   hearts.forEach(h => {
-    if (!h.collected) {
-      ctx.fillText("❤️", h.x, h.y);
-    }
+    if (!h.collected) ctx.fillText("❤️", h.x, h.y);
   });
 }
 
@@ -135,5 +161,17 @@ function drawScore() {
   ctx.fillText("❤️ " + score, 10, 25);
 }
 
+function drawGameOver() {
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#fff";
+  ctx.font = "24px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("Oh nein 😭", canvas.width / 2, 250);
+  ctx.fillText("Klick zum Neustart", canvas.width / 2, 290);
+}
+
 // Start
+resetGame();
 update();
