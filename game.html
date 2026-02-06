@@ -86,11 +86,9 @@
   <script>
     const startScreen = document.getElementById('startScreen');
     const startButton = document.getElementById('startButton');
-    const canvas = document.getElementById('game');
 
-    // START BUTTON EVENT
     startButton.addEventListener('click', () => {
-      // Animation: kleine fliegende Herzen
+      // kleine Herz-Animation
       let count = 0;
       const interval = setInterval(() => {
         const heart = document.createElement("div");
@@ -105,8 +103,10 @@
         count++;
         if (count > 40) {
           clearInterval(interval);
-          // Startbild ausblenden & Game starten
+          // Startbild ausblenden & Spiel starten
           startScreen.style.display = "none";
+          // Startet das Spiel aus game.js
+          if (typeof startGame === "function") startGame();
         }
       }, 50);
     });
