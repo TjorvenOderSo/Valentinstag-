@@ -1,7 +1,7 @@
-function startGame() {
+function start() {
   let count = 0;
 
-  let interval = setInterval(() => {
+  const interval = setInterval(() => {
     const heart = document.createElement("div");
     heart.className = "heart";
     heart.innerText = "💗";
@@ -14,8 +14,8 @@ function startGame() {
     if (count > 40) {
       clearInterval(interval);
       setTimeout(() => {
-        window.location.href = "game.html";
-      }, 1000);
+        window.location.href = "info.html";
+      }, 800);
     }
-  }, 100);
+  }, 80);
 }
