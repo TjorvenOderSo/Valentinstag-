@@ -2,61 +2,34 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Start ❤️</title>
+  <title>Für dich ❤️</title>
   <style>
     body {
+      margin: 0;
       background: #ffdee9;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
       font-family: sans-serif;
     }
     button {
       font-size: 2rem;
       padding: 20px 40px;
-      border-radius: 30px;
+      border-radius: 20px;
       border: none;
-      background: hotpink;
+      background: #ff4d6d;
       color: white;
       cursor: pointer;
     }
-    .heart {
-      position: absolute;
-      font-size: 24px;
-      animation: float 2s linear forwards;
-    }
-    @keyframes float {
-      from { top: 100vh; opacity: 1; }
-      to { top: -10vh; opacity: 0; }
-    }
   </style>
 </head>
-
 <body>
-  <button onclick="start()">Start 💗</button>
+  <button onclick="start()">❤️ Start ❤️</button>
 
   <script>
     function start() {
-      let count = 0;
-      let interval = setInterval(() => {
-        const heart = document.createElement("div");
-        heart.className = "heart";
-        heart.innerText = "💗";
-        heart.style.left = Math.random() * window.innerWidth + "px";
-        document.body.appendChild(heart);
-
-        setTimeout(() => heart.remove(), 2000);
-        count++;
-
-        if (count > 40) {
-          clearInterval(interval);
-          setTimeout(() => {
-            window.location.href = "game.html"; // 👈 WICHTIG
-          }, 1000);
-        }
-      }, 100);
+      window.location.href = "game.html";
     }
   </script>
 </body>
