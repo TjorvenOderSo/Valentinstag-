@@ -8,8 +8,8 @@ const heartSound = document.getElementById("heartSound");
 const PLATFORM_WIDTH = 120;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_RADIUS = 20;
-const GRAVITY = 0,2;   // feste Gravitation
-const JUMP = -3;        // feste Sprungkraft
+const GRAVITY = 0.25;   // feste Gravitation
+const JUMP = -8;        // feste Sprungkraft
 
 // GAME VARIABLES
 let score = 0;
@@ -199,4 +199,4 @@ function draw(){
     ctx.font="18px Arial";
     ctx.fillText("Nochmal 😈",canvas.width/2,canvas.height/2+52);
   }
-}
+      }
