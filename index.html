@@ -2,14 +2,62 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>❤️ Für dich</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Start ❤️</title>
+  <style>
+    body {
+      background: #ffdee9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    button {
+      font-size: 2rem;
+      padding: 20px 40px;
+      border-radius: 30px;
+      border: none;
+      background: hotpink;
+      color: white;
+      cursor: pointer;
+    }
+    .heart {
+      position: absolute;
+      font-size: 24px;
+      animation: float 2s linear forwards;
+    }
+    @keyframes float {
+      from { top: 100vh; opacity: 1; }
+      to { top: -10vh; opacity: 0; }
+    }
+  </style>
 </head>
+
 <body>
+  <button onclick="start()">Start 💗</button>
 
-  <h1 class="title">Drück auf Start 💗</h1>
-  <button onclick="startGame()">Start</button>
+  <script>
+    function start() {
+      let count = 0;
+      let interval = setInterval(() => {
+        const heart = document.createElement("div");
+        heart.className = "heart";
+        heart.innerText = "💗";
+        heart.style.left = Math.random() * window.innerWidth + "px";
+        document.body.appendChild(heart);
 
-  <script src="transition.js"></script>
+        setTimeout(() => heart.remove(), 2000);
+        count++;
+
+        if (count > 40) {
+          clearInterval(interval);
+          setTimeout(() => {
+            window.location.href = "game.html"; // 👈 WICHTIG
+          }, 1000);
+        }
+      }, 100);
+    }
+  </script>
 </body>
 </html>
