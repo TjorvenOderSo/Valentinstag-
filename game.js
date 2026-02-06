@@ -8,8 +8,8 @@ const heartSound = document.getElementById("heartSound");
 const PLATFORM_WIDTH = 120;
 const PLATFORM_HEIGHT = 15;
 const PLAYER_RADIUS = 20;
-const GRAVITY = 0.25;   // feste Gravitation
-const JUMP = -8;        // feste Sprungkraft
+const GRAVITY = 0;   // feste Gravitation
+const JUMP = -2;        // feste Sprungkraft
 
 // GAME VARIABLES
 let score = 0;
