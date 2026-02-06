@@ -15,7 +15,7 @@ let gameOver = false;
 
 const player = {
   x: canvas.width / 2,
-  y: canvas.height - 100,
+  y: canvas.height - 60,
   r: 20,
   vy: -12
 };
@@ -25,6 +25,8 @@ const jump = -12;
 
 let platforms = [];
 let hearts = [];
+let clouds = [];
+let satellites = [];
 
 // === RESET GAME ===
 function resetGame() {
@@ -32,29 +34,79 @@ function resetGame() {
   gameOver = false;
 
   player.x = canvas.width / 2;
-  player.y = canvas.height - 100;
+  player.y = canvas.height - 60;
   player.vy = -12;
 
-  // Mehr Plattformen proportional zur Höhe
-  const platformCount = Math.floor(canvas.height / 60); // alle 60px eine Plattform
   platforms = [];
-  for (let i = 0; i < platformCount; i++) {
+  hearts = [];
+  clouds = [];
+  satellites = [];
+
+  // === BODENPLATTFORM ===
+  platforms.push({
+    x: canvas.width / 2 - 150,
+    y: canvas.height - 20,
+    w: 300,
+    h: 15
+  });
+
+  // === RESTLICHE PLATTFORMEN (sortiert & gestaffelt) ===
+  const platformCount = Math.floor(canvas.height / 80);
+  let lastX = canvas.width / 2 - 60;
+  for (let i = 1; i < platformCount; i++) { // Startplattform ist i=0
+    let y = canvas.height - i * (canvas.height / platformCount) - 60;
+    let xOffset = Math.random() * 100 - 50;
+    let newX = Math.min(Math.max(lastX + xOffset, 0), canvas.width - 120);
+
     platforms.push({
-      x: Math.random() * (canvas.width - 120),
-      y: i * (canvas.height / platformCount),
+      x: newX,
+      y: y,
       w: 120,
       h: 15
     });
+
+    lastX = newX;
   }
 
-  // Mehr Herzen proportional zur Fläche
-  const heartCount = Math.floor((canvas.width * canvas.height) / 50000); // ~1 Herz pro 50k px²
-  hearts = [];
-  for (let i = 0; i < heartCount; i++) {
+  // === HERZEN AUF PLATTFORMEN ===
+  platforms.forEach(p => {
+    if (Math.random() < 0.7) { // 70% Chance Herz
+      hearts.push({
+        x: p.x + Math.random() * (p.w - 20) + 10,
+        y: p.y - 20,
+        collected: false
+      });
+    }
+  });
+
+  // Extra Herzen zwischendurch
+  const extraHearts = Math.floor(platformCount / 2);
+  for (let i = 0; i < extraHearts; i++) {
     hearts.push({
       x: Math.random() * (canvas.width - 30),
-      y: Math.random() * canvas.height,
+      y: Math.random() * canvas.height * 0.5,
       collected: false
+    });
+  }
+
+  // === WOLKEN (Himmel-Level) ===
+  for (let i = 0; i < 15; i++) {
+    clouds.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * 0.4,
+      w: 80 + Math.random() * 40,
+      h: 40 + Math.random() * 20,
+      speed: 0.2 + Math.random() * 0.5
+    });
+  }
+
+  // === SATELLITEN (Weltall-Level) ===
+  for (let i = 0; i < 10; i++) {
+    satellites.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * 0.25,
+      size: 15 + Math.random() * 15,
+      speed: 0.3 + Math.random() * 0.3
     });
   }
 }
@@ -125,6 +177,14 @@ function update() {
           h.collected = false;
         }
       });
+
+      clouds.forEach(c => {
+        c.y += diff * 0.2; // Parallax
+      });
+
+      satellites.forEach(s => {
+        s.y += diff * 0.15;
+      });
     }
 
     // Herz-Sammeln (größere Hitbox)
@@ -152,6 +212,30 @@ function update() {
 
 // === ZEICHNEN ===
 function draw() {
+  // Himmel/Weltall/Mond-Hintergrund
+  ctx.fillStyle = "#ffdee9";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Wolken
+  clouds.forEach(c => {
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.ellipse(c.x, c.y, c.w / 2, c.h / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    c.x += c.speed;
+    if (c.x - c.w / 2 > canvas.width) c.x = -c.w;
+  });
+
+  // Satelliten
+  satellites.forEach(s => {
+    ctx.fillStyle = "#ffb6c1"; // rosé Satelliten
+    ctx.beginPath();
+    ctx.rect(s.x, s.y, s.size, s.size / 2);
+    ctx.fill();
+    s.x += s.speed;
+    if (s.x - s.size > canvas.width) s.x = -s.size;
+  });
+
   // Plattformen
   ctx.fillStyle = "#ff8fab";
   platforms.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
@@ -188,7 +272,7 @@ function draw() {
     ctx.fillRect(canvas.width / 2 - 80, canvas.height / 2 + 20, 160, 45);
     ctx.fillStyle = "#fff";
     ctx.font = "18px Arial";
-    ctx.fillText("Nochmal 😙", canvas.width / 2, canvas.height / 2 + 52);
+    ctx.fillText("Nochmal 😈", canvas.width / 2, canvas.height / 2 + 52);
   }
 }
 
