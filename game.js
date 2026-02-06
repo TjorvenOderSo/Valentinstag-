@@ -1,6 +1,9 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+const jumpSound = document.getElementById("jumpSound");
+const heartSound = document.getElementById("heartSound");
+
 // === FULLSCREEN ===
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -17,7 +20,9 @@ const player = {
   x: canvas.width / 2,
   y: canvas.height - 60,
   r: 20,
-  vy: -12
+  vy: -12,
+  scale: 1,
+  scaleDir: 1
 };
 
 const gravity = 0.35;
@@ -29,8 +34,9 @@ let clouds = [];
 let satellites = [];
 
 // === LEVEL-INFO ===
-const PLATFORM_VERTICAL_SPACING = 80; // vertikaler Abstand
 const PLATFORM_WIDTH = 120;
+const MIN_SPACING = 70;
+const MAX_SPACING = 120;
 
 // === RESET GAME ===
 function resetGame() {
@@ -40,13 +46,15 @@ function resetGame() {
   player.x = canvas.width / 2;
   player.y = canvas.height - 60;
   player.vy = -12;
+  player.scale = 1;
+  player.scaleDir = 1;
 
   platforms = [];
   hearts = [];
   clouds = [];
   satellites = [];
 
-  // === BODENPLATTFORM ===
+  // Bodenplattform
   platforms.push({
     x: canvas.width / 2 - 150,
     y: canvas.height - 20,
@@ -55,12 +63,14 @@ function resetGame() {
     baseX: canvas.width / 2 - 150
   });
 
-  // === RESTLICHE PLATTFORMEN sortiert & gestaffelt ===
+  // Plattformen gestaffelt
   let lastX = canvas.width / 2 - 60;
-  let platformCount = Math.floor(canvas.height / PLATFORM_VERTICAL_SPACING);
+  let lastY = canvas.height - 60;
+  const platformCount = Math.floor(canvas.height / MIN_SPACING) * 2;
   for (let i = 1; i < platformCount; i++) {
-    let y = canvas.height - i * PLATFORM_VERTICAL_SPACING - 60;
-    let xOffset = Math.random() * 60 - 30; // +/-30px zufällig
+    let spacing = MIN_SPACING + Math.random() * (MAX_SPACING - MIN_SPACING);
+    let y = lastY - spacing;
+    let xOffset = Math.random() * 120 - 60;
     let newX = Math.min(Math.max(lastX + xOffset, 0), canvas.width - PLATFORM_WIDTH);
 
     platforms.push({
@@ -72,11 +82,12 @@ function resetGame() {
     });
 
     lastX = newX;
+    lastY = y;
   }
 
-  // === HERZEN auf Plattformen ===
+  // Herzen
   platforms.forEach(p => {
-    if (Math.random() < 0.7) { // 70% Chance Herz
+    if (Math.random() < 0.7) {
       hearts.push({
         x: p.x + Math.random() * (p.w - 20) + 10,
         y: p.y - 20,
@@ -85,9 +96,7 @@ function resetGame() {
     }
   });
 
-  // Extra Herzen zwischendurch
-  const extraHearts = Math.floor(platformCount / 2);
-  for (let i = 0; i < extraHearts; i++) {
+  for (let i = 0; i < platformCount / 2; i++) {
     hearts.push({
       x: Math.random() * (canvas.width - 30),
       y: Math.random() * canvas.height * 0.5,
@@ -95,24 +104,26 @@ function resetGame() {
     });
   }
 
-  // === WOLKEN (Himmel-Level) ===
+  // Wolken
   for (let i = 0; i < 15; i++) {
     clouds.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height * 0.4,
       w: 80 + Math.random() * 40,
       h: 40 + Math.random() * 20,
-      speed: 0.2 + Math.random() * 0.5
+      speed: 0.2 + Math.random() * 0.5,
+      offset: Math.random() * Math.PI * 2 // für fließende Schwebeanimation
     });
   }
 
-  // === SATELLITEN (Weltall-Level) ===
+  // Satelliten
   for (let i = 0; i < 10; i++) {
     satellites.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height * 0.25,
       size: 15 + Math.random() * 15,
-      speed: 0.3 + Math.random() * 0.3
+      speed: 0.3 + Math.random() * 0.3,
+      angle: Math.random() * Math.PI * 2 // Rotation
     });
   }
 }
@@ -126,16 +137,10 @@ canvas.addEventListener("mousemove", e => {
 // === RESET BUTTON ===
 canvas.addEventListener("click", e => {
   if (!gameOver) return;
-
   const x = e.clientX;
   const y = e.clientY;
-
-  if (
-    x > canvas.width / 2 - 80 &&
-    x < canvas.width / 2 + 80 &&
-    y > canvas.height / 2 + 20 &&
-    y < canvas.height / 2 + 65
-  ) {
+  if (x > canvas.width / 2 - 80 && x < canvas.width / 2 + 80 &&
+      y > canvas.height / 2 + 20 && y < canvas.height / 2 + 65) {
     resetGame();
   }
 });
@@ -149,20 +154,23 @@ function update() {
     player.vy += gravity;
     player.y += player.vy;
 
+    // Ball wippen beim Sprung
+    player.scale = 1 + Math.sin(Date.now() * 0.01) * 0.05;
+
     // Plattform-Kollision
     platforms.forEach(p => {
-      if (
-        player.vy > 0 &&
-        player.x > p.x &&
-        player.x < p.x + p.w &&
-        player.y + player.r > p.y &&
-        player.y + player.r < p.y + p.h
-      ) {
+      if (player.vy > 0 &&
+          player.x > p.x &&
+          player.x < p.x + p.w &&
+          player.y + player.r > p.y &&
+          player.y + player.r < p.y + p.h) {
         player.vy = jump;
+        jumpSound.currentTime = 0;
+        jumpSound.play();
       }
     });
 
-    // Kamera-Effekt
+    // Kamera
     if (player.y < canvas.height * 0.4) {
       const diff = canvas.height * 0.4 - player.y;
       player.y = canvas.height * 0.4;
@@ -171,7 +179,6 @@ function update() {
         p.y += diff;
         if (p.y > canvas.height) {
           p.y = 0;
-          // horizontale Position leicht variieren, Basis beibehalten
           p.x = Math.min(Math.max(p.baseX + Math.random() * 60 - 30, 0), canvas.width - PLATFORM_WIDTH);
         }
       });
@@ -185,13 +192,8 @@ function update() {
         }
       });
 
-      clouds.forEach(c => {
-        c.y += diff * 0.2;
-      });
-
-      satellites.forEach(s => {
-        s.y += diff * 0.15;
-      });
+      clouds.forEach(c => { c.y += diff * 0.2; });
+      satellites.forEach(s => { s.y += diff * 0.15; });
     }
 
     // Herz-Sammeln
@@ -199,48 +201,58 @@ function update() {
       if (!h.collected && Math.hypot(player.x - h.x, player.y - h.y) < 35) {
         h.collected = true;
         score++;
+        heartSound.currentTime = 0;
+        heartSound.play();
       }
     });
 
-    // Gewinnscreen bei 40 Herzen
+    // Gewinnscreen
     if (score >= 40) {
       window.location.href = "win.html";
     }
 
-    // Game Over (runterfallen)
-    if (player.y > canvas.height) {
-      gameOver = true;
-    }
+    // Game Over
+    if (player.y > canvas.height) gameOver = true;
   }
 
   draw();
   requestAnimationFrame(update);
 }
 
-// === ZEICHNEN ===
+// === DRAW ===
 function draw() {
-  // Hintergrund
-  ctx.fillStyle = "#ffdee9";
+  // THEMENWECHSEL
+  if (player.y > canvas.height * 0.7) ctx.fillStyle = "#ffdee9"; // Boden
+  else if (player.y > canvas.height * 0.4) ctx.fillStyle = "#ccefff"; // Himmel
+  else if (player.y > canvas.height * 0.15) ctx.fillStyle = "#0b0b2b"; // Weltall
+  else ctx.fillStyle = "#d9d9d9"; // Mond
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Wolken
+  // Wolken schweben
   clouds.forEach(c => {
-    ctx.fillStyle = "#fff";
-    ctx.beginPath();
-    ctx.ellipse(c.x, c.y, c.w / 2, c.h / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    c.x += c.speed;
-    if (c.x - c.w / 2 > canvas.width) c.x = -c.w;
+    if (player.y <= canvas.height * 0.7) {
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.ellipse(c.x, c.y + Math.sin(Date.now() * 0.002 + c.offset) * 10, c.w / 2, c.h / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      c.x += c.speed;
+      if (c.x - c.w / 2 > canvas.width) c.x = -c.w;
+    }
   });
 
-  // Satelliten
+  // Satelliten rotieren
   satellites.forEach(s => {
-    ctx.fillStyle = "#ffb6c1"; // rosé Satelliten
-    ctx.beginPath();
-    ctx.rect(s.x, s.y, s.size, s.size / 2);
-    ctx.fill();
-    s.x += s.speed;
-    if (s.x - s.size > canvas.width) s.x = -s.size;
+    if (player.y <= canvas.height * 0.4) {
+      s.angle += 0.02;
+      ctx.save();
+      ctx.translate(s.x + s.size/2, s.y + s.size/2);
+      ctx.rotate(s.angle);
+      ctx.fillStyle = "#ffb6c1";
+      ctx.fillRect(-s.size/2, -s.size/4, s.size, s.size/2);
+      ctx.restore();
+      s.x += s.speed;
+      if (s.x - s.size > canvas.width) s.x = -s.size;
+    }
   });
 
   // Plattformen
@@ -249,22 +261,24 @@ function draw() {
 
   // Herzen
   ctx.font = "22px Arial";
-  hearts.forEach(h => {
-    if (!h.collected) ctx.fillText("❤️", h.x, h.y);
-  });
+  hearts.forEach(h => { if (!h.collected) ctx.fillText("❤️", h.x, h.y); });
 
-  // Spieler
+  // Spieler Ball mit leichtem Wippen
+  ctx.save();
+  ctx.translate(player.x, player.y);
+  ctx.scale(player.scale, 1);
   ctx.beginPath();
-  ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+  ctx.arc(0, 0, player.r, 0, Math.PI * 2);
   ctx.fillStyle = "#ff4d6d";
   ctx.fill();
+  ctx.restore();
 
   // Score
   ctx.fillStyle = "#000";
   ctx.font = "18px Arial";
   ctx.fillText(`❤️ ${score} / 40`, 10, 25);
 
-  // Game Over Overlay
+  // Game Over
   if (gameOver) {
     ctx.fillStyle = "rgba(0,0,0,0.7)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -274,12 +288,11 @@ function draw() {
     ctx.font = "26px Arial";
     ctx.fillText("PAHAHA DU OPFER 🫵😂", canvas.width / 2, canvas.height / 2 - 40);
 
-    // Reset Button
     ctx.fillStyle = "#ff4d6d";
     ctx.fillRect(canvas.width / 2 - 80, canvas.height / 2 + 20, 160, 45);
     ctx.fillStyle = "#fff";
     ctx.font = "18px Arial";
-    ctx.fillText("Nochmal 🫩", canvas.width / 2, canvas.height / 2 + 52);
+    ctx.fillText("Nochmal 😈", canvas.width / 2, canvas.height / 2 + 52);
   }
 }
 
